@@ -1,2 +1,8 @@
 #!/bin/sh
-/sbin/iptables-restore < /etc/iptables/iptables.lst
+#/sbin/iptables-restore < /etc/iptables/iptables.lst
+
+iptables -A INPUT -i ens3 -j DROP
+
+# accept ssh
+iptables -A INPUT -i ens3 -p tcp --dport 22 -j ACCEPT
+
