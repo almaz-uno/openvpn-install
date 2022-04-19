@@ -1,2 +1,2 @@
 #!/bin/sh
-/sbin/iptables-restore < /etc/iptables.lst
+/sbin/iptables-restore < /etc/iptables/iptables.lst
