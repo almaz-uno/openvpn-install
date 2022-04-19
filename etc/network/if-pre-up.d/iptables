@@ -1,8 +1,21 @@
 #!/bin/sh
 #/sbin/iptables-restore < /etc/iptables/iptables.lst
 
-iptables -A INPUT -i ens3 -j DROP
+VPNServer="80.87.195.6" # Change to ip or host of your VPN server
+wan="ens3"
 
-# accept ssh
-iptables -A INPUT -i ens3 -p tcp --dport 22 -j ACCEPT
+# Allow SSH to the VPN server itself
+/sbin/iptables -A FORWARD -o $wan --destination $VPNServer --protocol tcp --dport 22 -j ACCEPT
+/sbin/iptables -A FORWARD -i $wan --source $VPNServer --protocol tcp --sport 22 -j ACCEPT
 
+# Block non-VPN traffic across the WAN (Internet) interface (after VPN setup)
+/sbin/iptables -A FORWARD -i $wan -j DROP
+/sbin/iptables -A FORWARD -o $wan -j DROP
+
+# Allow VPN client to connect to VPN server
+/sbin/iptables -A INPUT -i $wan --source $VPNServer --protocol udp --sport 1194 -j ACCEPT
+/sbin/iptables -A OUTPUT -o $wan --destination $VPNServer --protocol udp --dport 1194 -j ACCEPT
+
+# Block non-VPN traffic across the WAN (Internet) interface (before VPN setup)
+/sbin/iptables -A INPUT -i $wan -j DROP
+/sbin/iptables -A OUTPUT -o $wan -j DROP
